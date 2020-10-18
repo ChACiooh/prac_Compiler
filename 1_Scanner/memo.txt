@@ -1,0 +1,2 @@
+cminus.l에서 User define function은 냅두기
+cminus.l에서 코멘트가 어떠한 토큰으로도 처리되지 않도록 처리하기
