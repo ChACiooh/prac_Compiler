@@ -11,7 +11,7 @@
 
 /* states in scanner DFA */
 typedef enum
-   { START,INEQ,ASSIGN,INCOMMENT,INNUM,INID,DONE,INLT,INGT,INNE,INOVER,INCOMMENT_ }
+   { START,INEQ,INCOMMENT,INNUM,INID,DONE,INLT,INGT,INNE,INOVER,INCOMMENT_ }
    StateType;
 
 /* lexeme of identifier or reserved word */
@@ -94,25 +94,25 @@ TokenType getToken(void)
          else if (isalpha(c))
            state = INID;
 		 else if (c == '=')
-		   state = ASSIGN;
+		   state = INEQ;
+		 else if (c == '!')
+		   state = INNE;
          else if ((c == ' ') || (c == '\t') || (c == '\n'))
            save = FALSE;
-         else if (c == '{')
-         { save = FALSE;
-           state = INCOMMENT;
-         }
+		 else if (c == '/')
+		 { save = FALSE;
+		   state = INCOMMENT_;
+		 }
+		 else if (c == '<')
+		   state = INLT;
+		 else if (c == '>')
+		   state = INGT;
          else
          { state = DONE;
            switch (c)
            { case EOF:
                save = FALSE;
                currentToken = ENDFILE;
-               break;
-             case '=':
-               currentToken = EQ;
-               break;
-             case '<':
-               currentToken = LT;
                break;
              case '+':
                currentToken = PLUS;
@@ -149,27 +149,87 @@ TokenType getToken(void)
                break;
            }
          }
-         break;
+         break;			// start state ended.
+	   case INEQ:
+		 state = DONE;
+		 save = FALSE;
+		 if (c != '=')
+		 {
+			 /* backup in the input */
+			 ungetNextChar();
+			 currentToken = ASSIGN;
+		 }
+		 else	currentToken = EQ;
+		 break;
+	   case INNE:
+		 state = DONE;
+		 save = FALSE;
+		 if(c == '=')	currentToken = NE;
+		 else
+		 {
+			 ungetNextChar();
+			 currentToken = ERROR;
+		 }
+		 break;
+	   case INLT:
+		 state = DONE;
+		 save = FALSE;
+		 if(c == '=')	currentToken = LE;
+		 else
+		 {
+			 ungetNextChar();
+			 currentToken = LT;
+		 }
+		 break;
+	   case INGT:
+		 state = DONE;
+		 save = FALSE;
+		 if(c == '=')	currentToken = GE;
+		 else
+		 {
+			 ungetNextChar();
+			 currentToken = GT;
+		 }
+		 break;
        case INCOMMENT:
          save = FALSE;
          if (c == EOF)
          { state = DONE;
-           currentToken = ENDFILE;
+           currentToken = ERROR;	// need to close
          }
-         else if (c == '}') state = START;
+         else if (c == '*')
+		 {
+			 c = getNextChar();
+			 if(c == '/')	state = START;
+		 }
          break;
-       case INASSIGN:
-         state = DONE;
-         if (c == '=')
-           currentToken = ASSIGN;
-         else
-         { /* backup in the input */
-           ungetNextChar();
-           save = FALSE;
-           currentToken = ERROR;
-         }
+       case INCOMMENT_:	// now one '/' character read.
+		 save = FALSE;
+		 if (c == '*')	state = INCOMMENT;
+		 else			// input whitespace, id, num, etc.
+		 {
+			 ungetNextChar();
+			 state = INOVER;
+			 currentToken = OVER;
+		 }
          break; 
-       case INNUM:
+	   case INOVER:
+		 state = DONE;
+		 if (c == ' ' || c == '\t')	currentToken = OVER;
+		 else if (isdigit(c) || isalpha(c) || c == '(')
+		 {
+			 save = FALSE;
+			 ungetNextChar();
+			 currentToken = OVER;
+		 }
+		 else
+		 {
+			 save = FALSE;
+			 ungetNextChar();
+			 currentToken = ERROR;
+		 }
+		 break;
+	   case INNUM:
          if (!isdigit(c))
          { /* backup in the input */
            ungetNextChar();
