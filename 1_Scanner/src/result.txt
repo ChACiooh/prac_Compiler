@@ -1,0 +1,113 @@
+
+C-MINUS COMPILATION: example.txt
+   1: 32 + 4 + 5
+	1: NUM, val= 32
+	1: +
+	1: NUM, val= 4
+	1: +
+	1: NUM, val= 5
+   2: 3*4 + 5;
+	2: NUM, val= 3
+	2: *
+	2: NUM, val= 4
+	2: +
+	2: NUM, val= 5
+	2: ;
+   3: 3*(4+5)
+	3: NUM, val= 3
+	3: *
+	3: (
+	3: NUM, val= 4
+	3: +
+	3: NUM, val= 5
+	3: )
+   4: int a = 3;
+	4: reserved word: int
+	4: ID, name= a
+	4: =
+	4: NUM, val= 3
+	4: ;
+   5: 
+   6: int gcd(int u, int v)
+	6: reserved word: int
+	6: ID, name= gcd
+	6: (
+	6: reserved word: int
+	6: ID, name= u
+	6: ,
+	6: reserved word: int
+	6: ID, name= v
+	6: )
+   7: {
+	7: {
+   8: 	if(v == 0) return u;
+	8: reserved word: if
+	8: (
+	8: ID, name= v
+	8: ==
+	8: NUM, val= 0
+	8: )
+	8: reserved word: return
+	8: ID, name= u
+	8: ;
+   9: 	else return gcd(v, u-u/v*v);
+	9: reserved word: else
+	9: reserved word: return
+	9: ID, name= gcd
+	9: (
+	9: ID, name= v
+	9: ,
+	9: ID, name= u
+	9: -
+	9: ID, name= u
+	9: /
+	9: ID, name= v
+	9: *
+	9: ID, name= v
+	9: )
+	9: ;
+  10: 	/* u-u/v*v == u mod v */
+  11: }
+	11: }
+  12: 
+  13: void main()
+	13: reserved word: void
+	13: ID, name= main
+	13: (
+	13: )
+  14: {
+	14: {
+  15: 	int x; int y;
+	15: reserved word: int
+	15: ID, name= x
+	15: ;
+	15: reserved word: int
+	15: ID, name= y
+	15: ;
+  16: 	x = input(); y = input();
+	16: ID, name= x
+	16: =
+	16: ID, name= input
+	16: (
+	16: )
+	16: ;
+	16: ID, name= y
+	16: =
+	16: ID, name= input
+	16: (
+	16: )
+	16: ;
+  17: 	output(gcd(x,y));
+	17: ID, name= output
+	17: (
+	17: ID, name= gcd
+	17: (
+	17: ID, name= x
+	17: ,
+	17: ID, name= y
+	17: )
+	17: )
+	17: ;
+  18: }
+	18: }
+	19: EOF

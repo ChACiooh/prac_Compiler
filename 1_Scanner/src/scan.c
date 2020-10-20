@@ -64,8 +64,13 @@ static struct
 static TokenType reservedLookup (char * s)
 { int i;
   for (i=0;i<MAXRESERVED;i++)
-    if (!strcmp(s,reservedWords[i].str))
-      return reservedWords[i].tok;
+  { 
+	  //printf("i:%d, %s/%s\n", i, s, reservedWords[i].str);
+	  if (reservedWords[i].str != NULL && !strcmp(s,reservedWords[i].str))
+      {
+		  return reservedWords[i].tok;
+	  }
+  }
   return ID;
 }
 
@@ -144,6 +149,9 @@ TokenType getToken(void)
              case ';':
                currentToken = SEMI;
                break;
+			 case ',':
+			   currentToken = COMMA;
+			   break;
              default:
                currentToken = ERROR;
                break;
@@ -152,42 +160,42 @@ TokenType getToken(void)
          break;			// start state ended.
 	   case INEQ:
 		 state = DONE;
-		 save = FALSE;
 		 if (c != '=')
 		 {
 			 /* backup in the input */
 			 ungetNextChar();
+			 save = FALSE;
 			 currentToken = ASSIGN;
 		 }
 		 else	currentToken = EQ;
 		 break;
 	   case INNE:
 		 state = DONE;
-		 save = FALSE;
 		 if(c == '=')	currentToken = NE;
 		 else
 		 {
 			 ungetNextChar();
+			 save = FALSE;
 			 currentToken = ERROR;
 		 }
 		 break;
 	   case INLT:
 		 state = DONE;
-		 save = FALSE;
 		 if(c == '=')	currentToken = LE;
 		 else
 		 {
 			 ungetNextChar();
+			 save = FALSE;
 			 currentToken = LT;
 		 }
 		 break;
 	   case INGT:
 		 state = DONE;
-		 save = FALSE;
 		 if(c == '=')	currentToken = GE;
 		 else
 		 {
 			 ungetNextChar();
+			 save = FALSE;
 			 currentToken = GT;
 		 }
 		 break;
@@ -209,25 +217,19 @@ TokenType getToken(void)
 		 else			// input whitespace, id, num, etc.
 		 {
 			 ungetNextChar();
+			 save = TRUE;
+			 c = '/';
 			 state = INOVER;
 			 currentToken = OVER;
 		 }
          break; 
 	   case INOVER:
 		 state = DONE;
+		 save = FALSE;
 		 if (c == ' ' || c == '\t')	currentToken = OVER;
-		 else if (isdigit(c) || isalpha(c) || c == '(')
-		 {
-			 save = FALSE;
-			 ungetNextChar();
-			 currentToken = OVER;
-		 }
-		 else
-		 {
-			 save = FALSE;
-			 ungetNextChar();
-			 currentToken = ERROR;
-		 }
+		 else if (!(isdigit(c) || isalpha(c) || c == '('))	// not in FIRST(factor)
+		 { currentToken = ERROR; }
+		 ungetNextChar();
 		 break;
 	   case INNUM:
          if (!isdigit(c))
@@ -255,11 +257,13 @@ TokenType getToken(void)
          break;
      }
      if ((save) && (tokenStringIndex <= MAXTOKENLEN))
-       tokenString[tokenStringIndex++] = (char) c;
+		 tokenString[tokenStringIndex++] = (char) c;
      if (state == DONE)
      { tokenString[tokenStringIndex] = '\0';
        if (currentToken == ID)
-         currentToken = reservedLookup(tokenString);
+       {
+		   currentToken = reservedLookup(tokenString);
+	   }
      }
    }
    if (TraceScan) {
