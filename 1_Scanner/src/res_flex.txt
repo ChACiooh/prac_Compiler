@@ -1,0 +1,73 @@
+
+C-MINUS COMPILATION: test.tm
+	3: reserved word: int
+	3: ID, name= gcd
+	3: (
+	3: reserved word: int
+	3: ID, name= u
+	3: ,
+	3: reserved word: int
+	3: ID, name= v
+	3: )
+	4: {
+	5: reserved word: if
+	5: (
+	5: ID, name= v
+	5: ==
+	5: NUM, val= 0
+	5: )
+	5: reserved word: return
+	5: ID, name= u
+	5: ;
+	6: reserved word: else
+	6: reserved word: return
+	6: ID, name= gcd
+	6: (
+	6: ID, name= v
+	6: ,
+	6: ID, name= u
+	6: -
+	6: ID, name= u
+	6: /
+	6: ID, name= v
+	6: *
+	6: ID, name= v
+	6: )
+	6: ;
+	8: }
+	10: reserved word: void
+	10: ID, name= main
+	10: (
+	10: reserved word: void
+	10: )
+	11: {
+	12: reserved word: int
+	12: ID, name= x
+	12: ;
+	12: reserved word: int
+	12: ID, name= y
+	12: ;
+	13: ID, name= x
+	13: =
+	13: ID, name= input
+	13: (
+	13: )
+	13: ;
+	13: ID, name= y
+	13: =
+	13: ID, name= input
+	13: (
+	13: )
+	13: ;
+	14: ID, name= output
+	14: (
+	14: ID, name= gcd
+	14: (
+	14: ID, name= x
+	14: ,
+	14: ID, name= y
+	14: )
+	14: )
+	14: ;
+	15: }
+	16: EOF
