@@ -19,7 +19,7 @@ letter      [a-zA-Z]
 identifier  {letter}+
 newline     \n
 whitespace  [ \t]+
-comment		\/\*([^(\*\/)].|{whitespace}|{newline})*\*\/
+comment		\/\*([^(\*\/)(\/\*)].|{whitespace}|{newline})*\*\/
 
 %%
 
