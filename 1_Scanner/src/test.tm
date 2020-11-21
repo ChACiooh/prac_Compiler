@@ -1,5 +1,5 @@
-/* A program to perform Euclid's
-   Algorithm to computer gcd */
+/* Euclid asdfadf
+	ewfrneo */
 
 int gcd (int u, int v)
 {
@@ -14,3 +14,18 @@ void main(void)
 	x = input(); y = input();
 	output(gcd(x,y));
 }
+
+/**/
+
+
+/**** test */ A
+
+/*
+*
+*
+*
+test 2
+*/
+
+
+/*** test 3 ***// B /* 

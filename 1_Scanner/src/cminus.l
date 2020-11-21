@@ -52,7 +52,18 @@ comment		\/\*([^(\*\/)(\/\*)].|{whitespace}|{newline})*\*\/
 {identifier}    {return ID;}
 {newline}       {lineno++;}
 {whitespace}    {/* skip whitespace */}
-{comment}		{/* skip cmments */}
+"/*"			{
+					int c = input();
+					while(c != EOF){
+						if(c == '*') {
+							c = input();
+							if(c == EOF || c == '/')	break;
+						}
+						if(c == '\n')	lineno++;
+						c = input();
+					}
+				}
+
 
 %%
 
