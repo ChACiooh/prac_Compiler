@@ -1,41 +1,38 @@
 
 C-MINUS COMPILATION: example.txt
-	1: NUM, val= 32
-	1: +
-	1: NUM, val= 4
-	1: +
-	1: NUM, val= 5
-	2: NUM, val= 3
-	2: *
-	2: NUM, val= 4
-	2: +
-	2: NUM, val= 5
-	2: ;
-	3: NUM, val= 3
-	3: *
-	3: (
+	1: ID, name= le
+	1: ID, name= text
+.	1: *
+	1: /
+	2: /
+	2: /
+	3: /
+	3: /
+	3: /
+	3: ID, name= comment
 	3: NUM, val= 4
-	3: +
-	3: NUM, val= 5
-	3: )
-	4: reserved word: int
-	4: ID, name= a
-	4: =
-	4: NUM, val= 3
-	4: ;
-	6: ID, name= dZ
+	3: *
+	3: /
+	5: reserved word: int
+	5: ID, name= c
+	5: =
+	5: NUM, val= 10
+	5: /
+	5: ID, name= a
+	5: ;
+	6: reserved word: int
+	6: ID, name= Ab
 	6: =
-	6: ID, name= np
-.	6: ID, name= dot
-	6: (
-	6: ID, name= dA
-	6: [
-	6: ID, name= l
-	6: -
-	6: NUM, val= 1
-	6: ]
-	6: ,
-	6: ID, name= W
-	6: )
+	6: NUM, val= 3
 	6: ;
-	9: EOF
+	9: reserved word: int
+	9: ID, name= b
+	9: =
+	9: ID, name= a
+	9: /
+	9: NUM, val= 5
+	9: ;
+	10: /
+	10: *
+	10: ID, name= end
+	11: EOF

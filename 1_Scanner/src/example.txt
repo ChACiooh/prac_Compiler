@@ -1,8 +1,11 @@
-32 + 4 + 5
-3*4 + 5;
-3*(4+5)
-int a = 3;
+/* user examp*/le text. */
+/* comment2 *///
+////* comment 3 /*/ comment 4 */
+/**/
+int c = 10 //* asdf
+   */ a;
+int Ab = 3;
+/* test * / dsaf*/
 
-dZ = np.dot(dA[l-1], W);
-
-/* user example text. */
+int b = a / 5;
+/* end
