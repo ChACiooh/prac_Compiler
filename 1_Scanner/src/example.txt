@@ -1,7 +1,9 @@
 /* user examp*/le text. */
 /* comment2 *///
 ////* comment 3 /*/ comment 4 */
-/**/
+/*
+ * kkkk
+ */
 int c = 10 //* asdf
    */ a;
 int Ab = 3;

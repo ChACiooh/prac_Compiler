@@ -54,7 +54,7 @@ comment		\/\*([^(\*\/)(\/\*)].|{whitespace}|{newline})*\*\/
 {whitespace}    {/* skip whitespace */}
 "/*"			{
 					int c = input();
-					while(c != EOF){
+					while(c != EOF && c != '\0'){
 						if(c == '*') {
 							c = input();
 							if(c == EOF || c == '/')	break;

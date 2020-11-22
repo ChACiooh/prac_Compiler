@@ -226,7 +226,7 @@ TokenType getToken(void)
 	   case INOVER:
 		 state = DONE;
 		 save = FALSE;
-		 if (c == ' ' || c == '\t')	currentToken = OVER;
+		 // if (c == ' ' || c == '\t')	currentToken = OVER;
 		 // else if (!(isdigit(c) || isalpha(c) || c == '('))	// not in FIRST(factor)
 		 // { currentToken = ERROR; }
 		 ungetNextChar();
