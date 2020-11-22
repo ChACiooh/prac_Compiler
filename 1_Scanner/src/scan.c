@@ -227,8 +227,8 @@ TokenType getToken(void)
 		 state = DONE;
 		 save = FALSE;
 		 if (c == ' ' || c == '\t')	currentToken = OVER;
-		 else if (!(isdigit(c) || isalpha(c) || c == '('))	// not in FIRST(factor)
-		 { currentToken = ERROR; }
+		 // else if (!(isdigit(c) || isalpha(c) || c == '('))	// not in FIRST(factor)
+		 // { currentToken = ERROR; }
 		 ungetNextChar();
 		 break;
 	   case INNUM:

@@ -7,5 +7,8 @@ int c = 10 //* asdf
 int Ab = 3;
 /* test * / dsaf*/
 
-int b = a / 5;
-/* end
+dZ = np.dot(dA[l-1], W);
+
+/* user example text. */
+
+a // b
