@@ -63,11 +63,11 @@ extern int lineno; /* source line number for listing */
 /**************************************************/
 
 typedef enum {StmtK,ExpK} NodeKind;
-typedef enum {IfK,RepeatK,AssignK,ReadK,WriteK} StmtKind;
-typedef enum {OpK,ConstK,IdK} ExpKind;
+typedef enum {IfK,WhileK,ExpSK,CmpndK,RetK} StmtKind;
+typedef enum {OpK,ConstK,AssignK,IdK} ExpKind;
 
 /* ExpType is used for type checking */
-typedef enum {Void,Integer,Boolean} ExpType;
+typedef enum {Void,Integer} ExpType;
 
 #define MAXCHILDREN 3
 
@@ -81,6 +81,9 @@ typedef struct treeNode
              int val;
              char * name; } attr;
      ExpType type; /* for type checking of exps */
+
+	 int arr_size;
+	 int is_param;
    } TreeNode;
 
 /**************************************************/
