@@ -30,15 +30,7 @@ static int yylex(void); // added 11/2/11 to ensure no conflict with lex
 
 %% /* Grammar for C-Minus */
 
-ID			: { $$ = newExpNode(IdK);
-				$$->attr.name = copyString(tokenString); }
-			;
-NUM			: { $$ = newExpNode(ConstK);
-				$$->attr.val = atoi(tokenString); }
-			;
-
-program     : dcl_list
-                { savedTree = $1;} 
+program     : dcl_list { savedTree = $1;} 
             ;
 dcl_list	: dcl_list dcl
 				{ YYSTYPE t = $1;
@@ -54,39 +46,52 @@ dcl_list	: dcl_list dcl
 			;
 dcl			: var_dcl { $$ = $1; }
 			| fun_dcl { $$ = $1; }
-			| error	{ $$ = NULL; }
+			| ERROR { $$ = NULL; }
 			;
-var_dcl		: type_spec ID SEMI
+var_dcl		: type_spec ID { 
+				  savedName = copyString(tokenString);
+				  savedLineNo = lineno;
+			  } SEMI
 				{ 
-					$$ = newExpNode(IdK);
-					if ($1 == INT) { $$->type = Integer; }
-					else if ($1 == VOID) { $$->type = Void; }
-					$$->attr.name = $2;
-
+					$$ = newDclNode(VdclK);
+					$$->type = $1;
+					$$->attr.name = savedName;
+					$$->lineno = savedLineNo;
 				}
-			| type_spec ID LBRACE NUM RBRACE SEMI
+			| type_spec ID { 
+				savedName = copyString(tokenString);
+				savedLineNo = lineno;
+			  }LBRACE NUM RBRACE SEMI
 				{
-					$$ = newExpNode(IdK);
-					if ($1 == INT) { $$->type = Integer; }
-					else if ($1 == VOID) { $$->type = Void; }
+					$$ = newDclNode(VdclK);
+					$$->type = $1;
 					$$->attr.name = $2;
 					$$->arr_size = $4;
+					$$->lineno = savedLineNo;
 				}
 			;
-type_spec	: INT { $$ = INT; }
-			| VOID { $$ = VOID; }
+type_spec	: INT { $$ = Integer; }
+			| VOID { $$ = Void; }
+			| ERROR {
+				yyerror("Invalid type error.");
+				$$ = NULL;
+				}
 			;
-fun_dcl		: type_spec ID LPAREN params RPAREN cmpnd_stmt
+fun_dcl		: type_spec ID {
+				  savedName = copyString(tokenString);
+				  savedLineNo = lineno;
+			  } LPAREN params RPAREN cmpnd_stmt
 				{
-					YYSTYPE fdcl = $$; // need to make new~~
-					if ($1 == VOID) { fdcl->type = Void; }
-					else if ($1 == INT) { fdcl->type = Integer; }
-					fdcl->attr.name = $2;
-					fdcl->child[0] = $4;
-					fdcl->child[1] = $6;
+					$$ = newDclNode(FdclK);
+					$$->type = $1;
+					$$->attr.name = savedName;
+					$$->child[0] = $5;
+					$$->child[1] = $7;
+					$$->lineno = svedLineNo;
 				}
 			;
-params		: param_list | VOID
+params		: param_list { $$ = $1; }
+			| VOID { /* empty */ }
 			;
 param_list	: param_list COMMA param
 				{
@@ -97,23 +102,52 @@ param_list	: param_list COMMA param
 							pl = pl->sibling;
 						pl->sibling = $3;
 						$$ = $1;
-					} else $$ = $3;
+					} else {
+						yyerror("Function needs a parameter before ','");
+						$$ = NULL;
+					}
 				}
 			| param { $$ = $1; }
 			;
 param		: type_spec ID
 				{
 					$$ = newExpNode(Idk);
-					if ($1 == INT) { $$->type = Integer; }
-					else if ($1 == VOID) { $$->type = Void; }
+					$$->type = $1;
+					$$->attr.name = copyString(tokenString);
+					$$->is_param = TRUE;
+					$$->lineno = lineno;
+				}
+			| type_spec ID { 
+				savedName = copyString(tokenString);
+				savedLineNo = lineno;
+			} LBRACE RBRACE
+				{
+					$$ = newExpNode(IdK);
+					$$->type = $1;
 					$$->attr.name = $2;
 					$$->is_param = TRUE;
+					$$->lineno = savedLineNo;
+					$$->arr_size = 0;	// don't know the size
 				}
-			| type_spec ID LBRACE RBRACE
 			;
-cmpnd_stmt	: LCURLY local_dcls stmt_seq RCURLY
+cmpnd_stmt	: LCURLY local_dcls stmt_list RCURLY
+				{
+					$$ = newStmtNode(CmpndK);
+					$$->child[0] = $2;
+					$$->child[1] = $3;
+				}
 			;
-local_dcls	: local_dcls vardcl
+local_dcls	: local_dcls var_dcl
+				{
+					YYSTYPE t = $1;
+					if (t != NULL)
+					{
+						while(t->sibling != NULL)
+							t = t->sibling;
+						t->sibling = $2;
+						$$ = $1;
+					} else $$ = $2;
+				}
 			| /* empty */
 			;
 stmt_list   : stmt_list SEMI stmt
@@ -122,28 +156,33 @@ stmt_list   : stmt_list SEMI stmt
                    { while (t->sibling != NULL)
                         t = t->sibling;
                      t->sibling = $3;
-                     $$ = $1; }
-                     else $$ = $3;
+                     $$ = $1; 
+				   } else {
+					   yyerror("statement needed before ';'");
+					   $$ = NULL;
+				   }
                  }
             | stmt  { $$ = $1; }
 			| /* empty */
             ;
 stmt        : select_stmt { $$ = $1; }
-			| exp_stmt { $$ = $1; }
+			| ns_stmt { $$ = $1; }
+			| ERROR { $$ = NULL; }
+            ;
+ns_stmt		: exp_stmt { $$ = $1;}
 			| cmpnd_stmt { $$ = $1; }
 			| iter_stmt { $$ = $1; }
 			| return_stmt { $$ = $1; }
-            ;
-exp_stmt	: exp SEMI
-				{ $$ = $1; }
-			| SEMI
+			;
+exp_stmt	: exp SEMI { $$ = $1; }
+			| SEMI { $$ = NULL; }
 			;
 select_stmt : IF LPAREN exp RPAREN stmt
                  { $$ = newStmtNode(IfK);
                    $$->child[0] = $3;
                    $$->child[1] = $5;
                  }
-            | IF LPAREN exp RPAREN stmt ELSE stmt
+            | IF LPAREN exp RPAREN ns_stmt ELSE stmt
                  { $$ = newStmtNode(IfK);
                    $$->child[0] = $3;
                    $$->child[1] = $5;
@@ -157,28 +196,44 @@ iter_stmt	: WHILE LPAREN exp RPAREN stmt
 				}
 			;
 return_stmt	: RETURN SEMI
-				{ $$ = NULL; }
+				{ $$ = newStmtNode(RetK);
+				}
 			| RETURN exp SEMI
-				{ $$ = $1; }
+				{ $$ = newStmtNode(RetK); 
+				  $$->child[0] = $2;
+				}
 			;
 exp			: var ASSIGN exp
-				{ $$->child[0] = $1;
+				{ $$ = newExpNode(AssignK);
+				  $$->child[0] = $1;
+				  $$->attr.op = ASSIGN;
 				  $$->child[1] = $3;
-				  $$->attr.name = savedName;
-				  $$->lineno = savedLineNo;
 				}
 			| simple_exp
 				{ $$ = $1; }
 			;
-var			: ID { savedName = copyString(tokenString);
-                   savedLineNo = lineno; }
+var			: ID 
+				{ $$ = newExpNode(IdK);
+				  $$->attr.name = copyString(tokenString);
+				  $$->lineno = lineno;
+				}
 			| ID { savedName = copyString(tokenString);
                    savedLineNo = lineno; }
 				LBRACE exp RBRACE
-				{ /* TODO */ }
+				{ $$ = newExpNode(IdK);
+				  $$->child[0] = $4;
+				  $$->attr.name = copyString(tokenString);
+				  $$->lineno = lineno;
+				}
 			;
 simple_exp	: addt_exp relop addt_exp
-			| addt_exp
+				{
+					$$ = newExpNode(OpK);
+					$$->child[0] = $1;
+					$$->attr.op = $2;
+					$$->child[1] = $3;
+				}
+			| addt_exp { $$ = $1; }
 			;
 relop		: LE { $$ = LE; }
 			| LT { $$ = LT; }
@@ -186,11 +241,17 @@ relop		: LE { $$ = LE; }
 			| GE { $$ = GE; }
 			| EQ { $$ = EQ; }
 			| NE { $$ = NE; }
-			;
+			; 
 addt_exp	: addt_exp addop term
-			| term
+				{
+					$$ = newExpNode(OpK);
+					$$->child[0] = $1;
+					$$->attr.op = $2;
+					$$->child[1] = $3;
+				}
+			| term { $$ = $1; }
 			;
-addop		: PLUS | MINUS
+addop		: PLUS { $$ = PLUS; } | MINUS { $$ = MINUS; }
 			;
 term		: term mulop factor
 				{
@@ -199,95 +260,46 @@ term		: term mulop factor
 					$$->child[1] = $3;
 					$$->attr.op = $2;
 				}
-			| factor
+			| factor { $$ = $1; }
 			;
-mulop		: TIMES | OVER
+mulop		: TIMES { $$ = TIMES; } | OVER { $$ = OVER; }
 			;
 factor		: LPAREN exp RPAREN
-				{ $$ = $2; }
-			| var
-				{ $$ = $1; }
-			| call
-				{ $$ = $1; }
-			| NUM
+				{ $$ = newExpNode(ParenK); 
+				  $$->child[0] = $2;
+				}
+			| var { $$ = $1; }
+			| call { $$ = $1; }
+			| NUM { $$ = NUM; }
 			;
-call		: ID LPAREN args RPAREN
+call		: ID { savedName = copyString(tokenString);
+				   savedLineno = lineno;
+			  } LPAREN args RPAREN
 				{
-					// TODO
+					$$ = newExpNode(CallK);
+					$$->attr.name = savedName;
+					$$->child[0] = $4;
 				}
 			;
-args		: arg_list
-				{ $$ = $1; }
+args		: arg_list { $$ = $1; }
 			| /* empty */
 			;
 arg_list	: arg_list COMMA exp
-				{ /* TODO */ }
-			| exp
+				{ YYSTYPE al = $1;
+				  if (al != NULL)
+				  {
+					  while(al->sibling != NULL)
+						  al = al->sibling;
+					  al->sibling =- $3;
+					  $$ = al;
+				  } else { 
+					  yyerror("Function-call needs an argument before ','"); 
+					  $$ = NULL;  
+				  }
+				}
+			| exp { $$ = $1; }
 			;
-/* user implementation */
-assign_stmt : ID { savedName = copyString(tokenString);
-                   savedLineNo = lineno; }
-              ASSIGN exp
-                 { $$ = newStmtNode(AssignK);
-                   $$->child[0] = $4;
-                   $$->attr.name = savedName;
-                   $$->lineno = savedLineNo;
-                 }
-            ;
-exp         : simple_exp LT simple_exp 
-                 { $$ = newExpNode(OpK);
-                   $$->child[0] = $1;
-                   $$->child[1] = $3;
-                   $$->attr.op = LT;
-                 }
-            | simple_exp EQ simple_exp
-                 { $$ = newExpNode(OpK);
-                   $$->child[0] = $1;
-                   $$->child[1] = $3;
-                   $$->attr.op = EQ;
-                 }
-            | simple_exp { $$ = $1; }
-            ;
-simple_exp  : simple_exp PLUS term 
-                 { $$ = newExpNode(OpK);
-                   $$->child[0] = $1;
-                   $$->child[1] = $3;
-                   $$->attr.op = PLUS;
-                 }
-            | simple_exp MINUS term
-                 { $$ = newExpNode(OpK);
-                   $$->child[0] = $1;
-                   $$->child[1] = $3;
-                   $$->attr.op = MINUS;
-                 } 
-            | term { $$ = $1; }
-            ;
-term        : term TIMES factor 
-                 { $$ = newExpNode(OpK);
-                   $$->child[0] = $1;
-                   $$->child[1] = $3;
-                   $$->attr.op = TIMES;
-                 }
-            | term OVER factor
-                 { $$ = newExpNode(OpK);
-                   $$->child[0] = $1;
-                   $$->child[1] = $3;
-                   $$->attr.op = OVER;
-                 }
-            | factor { $$ = $1; }
-            ;
-factor      : LPAREN exp RPAREN
-                 { $$ = $2; }
-            | NUM
-                 { $$ = newExpNode(ConstK);
-                   $$->attr.val = atoi(tokenString);
-                 }
-            | ID { $$ = newExpNode(IdK);
-                   $$->attr.name =
-                         copyString(tokenString);
-                 }
-            | error { $$ = NULL; }
-            ;
+/* user implementation ended. */
 
 %%
 

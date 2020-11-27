@@ -60,6 +60,26 @@ void printToken( TokenType token, const char* tokenString )
   }
 }
 
+/* Function newDclNode creates a new declaration
+ * node for syntax tree construction
+ */
+TreeNode * newDclNode(DclKind kind)
+{ TreeNode * t = (TreeNode *) malloc(sizeof(TreeNode));
+  int i;
+  if (t==NULL)
+    fprintf(listing,"Out of memory error at line %d\n",lineno);
+  else {
+    for (i=0;i<MAXCHILDREN;i++) t->child[i] = NULL;
+    t->sibling = NULL;
+    t->nodekind = DclK;
+    t->kind.dcl = kind;
+    t->lineno = lineno;
+	t->is_param = FALSE;
+	t->arr_size = -1;
+  }
+  return t;
+}
+
 /* Function newStmtNode creates a new statement
  * node for syntax tree construction
  */
@@ -74,6 +94,8 @@ TreeNode * newStmtNode(StmtKind kind)
     t->nodekind = StmtK;
     t->kind.stmt = kind;
     t->lineno = lineno;
+	t->is_param = FALSE;
+	t->arr_size = -1;
   }
   return t;
 }
@@ -93,6 +115,8 @@ TreeNode * newExpNode(ExpKind kind)
     t->kind.exp = kind;
     t->lineno = lineno;
     t->type = Void;
+	t->is_param = FALSE;
+	t->arr_size = -1;	// it is not array basically.
   }
   return t;
 }
