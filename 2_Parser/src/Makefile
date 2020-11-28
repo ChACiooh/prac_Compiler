@@ -35,13 +35,13 @@ y.tab.o: y.tab.c globals.h y.tab.h util.h scan.h parse.h
 symtab.o: symtab.c symtab.h
 	$(CC) $(CFLAGS) -c symtab.c
 
-analyze.o: analyze.c globals.h symtab.h analyze.h
+analyze.o: analyze.c globals.h y.tab.h symtab.h analyze.h
 	$(CC) $(CFLAGS) -c analyze.c
 
-code.o: code.c code.h globals.h
+code.o: code.c code.h globals.h y.tab.h
 	$(CC) $(CFLAGS) -c code.c
 
-cgen.o: cgen.c globals.h symtab.h code.h cgen.h
+cgen.o: cgen.c globals.h y.tab.h symtab.h code.h cgen.h
 	$(CC) $(CFLAGS) -c cgen.c
 
 clean:

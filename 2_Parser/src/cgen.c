@@ -54,29 +54,30 @@ static void genStmt( TreeNode * tree)
          if (TraceCode)  emitComment("<- if") ;
          break; /* if_k */
 
+		 /*
       case RepeatK:
          if (TraceCode) emitComment("-> repeat") ;
          p1 = tree->child[0] ;
          p2 = tree->child[1] ;
          savedLoc1 = emitSkip(0);
          emitComment("repeat: jump after body comes back here");
-         /* generate code for body */
+         * generate code for body *
          cGen(p1);
-         /* generate code for test */
+         * generate code for test *
          cGen(p2);
          emitRM_Abs("JEQ",ac,savedLoc1,"repeat: jmp back to body");
          if (TraceCode)  emitComment("<- repeat") ;
-         break; /* repeat */
+         break; * repeat *
 
       case AssignK:
          if (TraceCode) emitComment("-> assign") ;
-         /* generate code for rhs */
+         * generate code for rhs *
          cGen(tree->child[0]);
-         /* now store value */
+         * now store value *
          loc = st_lookup(tree->attr.name);
          emitRM("ST",ac,loc,gp,"assign: store value");
          if (TraceCode)  emitComment("<- assign") ;
-         break; /* assign_k */
+         break; * assign_k *
 
       case ReadK:
          emitRO("IN",ac,0,0,"read integer value");
@@ -84,11 +85,12 @@ static void genStmt( TreeNode * tree)
          emitRM("ST",ac,loc,gp,"read: store value");
          break;
       case WriteK:
-         /* generate code for expression to write */
+         * generate code for expression to write *
          cGen(tree->child[0]);
-         /* now output it */
+         * now output it *
          emitRO("OUT",ac,0,0,"write ac");
          break;
+		 */
       default:
          break;
     }

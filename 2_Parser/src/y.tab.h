@@ -55,28 +55,29 @@ extern int yydebug;
     WHILE = 261,
     INT = 262,
     VOID = 263,
-    ID = 264,
-    NUM = 265,
+    PLUS = 264,
+    MINUS = 265,
     TIMES = 266,
     OVER = 267,
-    PLUS = 268,
-    MINUS = 269,
-    EQ = 270,
-    NE = 271,
-    LT = 272,
-    LE = 273,
-    GT = 274,
-    GE = 275,
-    ASSIGN = 276,
-    LPAREN = 277,
-    RPAREN = 278,
-    LBRACE = 279,
-    RBRACE = 280,
-    LCURLY = 281,
-    RCURLY = 282,
-    SEMI = 283,
-    COMMA = 284,
-    ERROR = 285
+    EQ = 268,
+    NE = 269,
+    LT = 270,
+    LE = 271,
+    GT = 272,
+    GE = 273,
+    ASSIGN = 274,
+    LPAREN = 275,
+    RPAREN = 276,
+    LBRACE = 277,
+    RBRACE = 278,
+    LCURLY = 279,
+    RCURLY = 280,
+    SEMI = 281,
+    COMMA = 282,
+    ID = 283,
+    NUM = 284,
+    ERROR = 285,
+    IFX = 286
   };
 #endif
 /* Tokens.  */
@@ -86,28 +87,29 @@ extern int yydebug;
 #define WHILE 261
 #define INT 262
 #define VOID 263
-#define ID 264
-#define NUM 265
+#define PLUS 264
+#define MINUS 265
 #define TIMES 266
 #define OVER 267
-#define PLUS 268
-#define MINUS 269
-#define EQ 270
-#define NE 271
-#define LT 272
-#define LE 273
-#define GT 274
-#define GE 275
-#define ASSIGN 276
-#define LPAREN 277
-#define RPAREN 278
-#define LBRACE 279
-#define RBRACE 280
-#define LCURLY 281
-#define RCURLY 282
-#define SEMI 283
-#define COMMA 284
+#define EQ 268
+#define NE 269
+#define LT 270
+#define LE 271
+#define GT 272
+#define GE 273
+#define ASSIGN 274
+#define LPAREN 275
+#define RPAREN 276
+#define LBRACE 277
+#define RBRACE 278
+#define LCURLY 279
+#define RCURLY 280
+#define SEMI 281
+#define COMMA 282
+#define ID 283
+#define NUM 284
 #define ERROR 285
+#define IFX 286
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
