@@ -186,11 +186,14 @@ void printTree( TreeNode * tree )
 		case VdclK:
 			fprintf(listing,"Var declaration, name : %s, type : ",tree->attr.name);
 			if(tree->type == Integer)
-				fprintf(listing,"int\n");
+				fprintf(listing,"int ");
 			else if(tree->type == Void)
-				fprintf(listing,"void\n");
+				fprintf(listing,"void ");
 			else
-				fprintf(listing,"unknown type\n");
+				fprintf(listing,"unknown type");
+			if(tree->arr_size != -1)
+				fprintf(listing,"array size : %d", tree->arr_size);
+			fprintf(listing,"\n");
 			break;
 		case FdclK:
 			fprintf(listing,"Function declaration: %s\n",tree->attr.name);

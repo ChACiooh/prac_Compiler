@@ -1,4 +1,2 @@
-int func(void)
-{ int a; 
-  return a;
-}
+int a;
+void b[10];

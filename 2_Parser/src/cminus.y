@@ -53,32 +53,28 @@ dcl			: var_dcl { $$ = $1; }
 			| fun_dcl { $$ = $1; }
 			;
 
-var_dcl		: type_spec ID
-				{
-					savedName = copyString(tokenString);
-				} SEMI {
-					$$ = newDclNode(VdclK);
-					$$->attr.name = copyString(savedName);
-					if($1 == INT)
-						$$->type = Integer;
-					else if($1 == VOID)
-						$$->type = Void;
-					$$->lineno = lineno;
-				}
-			| type_spec ID {
-					savedName = copyString(tokenString);
-				} LBRACE NUM {
-					savedVal = atoi(tokenString);
-				} RBRACE SEMI { 
-					$$ = newDclNode(VdclK); 
-					if($1 == INT)
-						$$->type = Integer;
-					else if($1 == VOID)
-						$$->type = Void;
-					$$->attr.name = copyString(savedName);
-					$$->arr_size = savedVal;
-					$$->lineno = lineno;
-				}
+var_dcl		: nv_dcl SEMI | arr_dcl SEMI;
+prim_dcl	: INT ID {
+				  /* int a */
+				  $$ = newDclNode(VdclK);
+				  $$->attr.name = copyString(tokenString);
+				  $$->type = Integer;
+				  $$->lineno = lineno;
+			  }
+			| VOID ID {
+				  /* void a */
+				  $$ = newDclNode(VdclK);
+				  $$->attr.name = copyString(tokenString);
+				  $$->type = Void;
+				  $$->lineno = lineno;
+			  }
+nv_dcl		: prim_dcl {$$=$1;}
+			;
+arr_dcl		: prim_dcl LBRACE NUM { savedVal = atoi(tokenString); } RBRACE {
+				  /* void arr */
+				  $$ = $1;
+				  $$->arr_size = savedVal;
+			  }
 			;
 type_spec	: INT | VOID
 			;
@@ -172,12 +168,12 @@ local_dcls	: local_dcls var_dcl
 stmt_list   : stmt_list_ { $$ = $1; }	
 			| /* empty */
             ;
-stmt_list_	: stmt_list_ SEMI stmt
+stmt_list_	: stmt_list_ stmt
                  { YYSTYPE t = $1;
                    if (t != NULL)
                    { while (t->sibling != NULL)
                         t = t->sibling;
-                     t->sibling = $3;
+                     t->sibling = $2;
                      $$ = $1; 
 				   } else {
 					   yyerror("statement needed before ';'");
