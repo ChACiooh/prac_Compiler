@@ -4,6 +4,7 @@ void b[10];
 int main(int k, int l){
 	int ccc;
 	int arr[10];
+	/* assign test */
 	arr[l/10] = ccc = k;
 	if(ccc < 1000)
 		return 10;

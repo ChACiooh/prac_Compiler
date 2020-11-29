@@ -91,7 +91,10 @@ fun_dcl		: prim_dcl LPAREN params RPAREN cmpnd_stmt
 				}
 			;
 params		: param_list { $$ = $1; }
-			| VOID /* empty */
+			| VOID { 
+					$$ = newPrimeNode();
+					$$->is_param = TRUE;
+				}
 			;
 param_list	: param_list COMMA param
 				{
@@ -264,9 +267,10 @@ factor		: LPAREN exp RPAREN
 			;
 call		: id_var LPAREN args RPAREN
 				{
-					$$ = newExpNode(CallK);
-					$$->child[0] = $1;
-					$$->child[1] = $3;
+					$$ = $1;
+					$$->nodekind = ExpK;
+					$$->kind.exp = CallK;
+					$$->child[0] = $3;
 				}
 			;
 args		: arg_list { $$ = $1; }

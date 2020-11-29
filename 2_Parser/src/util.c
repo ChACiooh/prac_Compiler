@@ -194,7 +194,12 @@ void printTree( TreeNode * tree )
 			fprintf(listing,"\n");
 			break;
 		case FdclK:
-			fprintf(listing,"Function declaration: %s\n",tree->attr.name);
+			fprintf(listing,"Function declaration : %s, return type : ",tree->attr.name);
+			if(tree->type == Integer)
+				fprintf(listing,"int ");
+			else if(tree->type == Void)
+				fprintf(listing,"void ");
+			fprintf(listing,"\n");
 			break;
 		default:
 			fprintf(listing,"Unknown DclNode kind\n");
@@ -219,32 +224,33 @@ void printTree( TreeNode * tree )
 		  fprintf(listing,"Return\n");
 		  break;
         default:
-          fprintf(listing,"Unknown ExpNode kind\n");
+          fprintf(listing,"Unknown StmtNode kind\n");
           break;
       }
     }
     else if (tree->nodekind==ExpK)
     { switch (tree->kind.exp) {
         case OpK:
-          fprintf(listing,"Op: ");
+          fprintf(listing,"Op : ");
           printToken(tree->attr.op,"\0");
           break;
         case ConstK:
-          fprintf(listing,"Const: %d\n",tree->attr.val);
+          fprintf(listing,"Const : %d\n",tree->attr.val);
           break;
         case IdK:
-          fprintf(listing,"Id: %s\n",tree->attr.name);
+          fprintf(listing,"Id : %s\n",tree->attr.name);
           break;
         case AssignK:
           //fprintf(listing,"Assign to: %s\n",tree->child[0]->attr.name);
-          fprintf(listing,"Assign to first var, Op: ");
+          fprintf(listing,"Assign to first var, Op : ");
 		  printToken(tree->attr.op,"\0");
           break;
 		case ParenK:
 		  fprintf(listing,"Paren factor\n");
 		  break;
 		case CallK:
-		  fprintf(listing,"Call: %s\n",tree->attr.name);
+		  fprintf(listing,"Call, name : %s, with argument below\n", tree->attr.name);
+		  break;
         default:
           fprintf(listing,"Unknown ExpNode kind\n");
           break;
