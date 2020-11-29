@@ -212,7 +212,8 @@ void printTree( TreeNode * tree )
 						fprintf(listing,"void\n");
 					t = t->sibling;
 				}
-			}
+			} else
+				fprintf(listing,"Non parameter\n");
 			UNINDENT;
 			break;
 		default:

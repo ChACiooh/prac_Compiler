@@ -71,15 +71,11 @@ prim_dcl	: INT ID {
 nv_dcl		: prim_dcl {$$=$1;}
 			;
 arr_dcl		: prim_dcl LBRACE NUM { savedVal = atoi(tokenString); } RBRACE {
-				  /* void arr */
 				  $$ = $1;
 				  $$->arr_size = savedVal;
 			  }
 			;
-type_spec	: INT | VOID
-			;
-fun_dcl		: type_spec ID { savedName = copyString(tokenString); }
-			  LPAREN params RPAREN cmpnd_stmt
+fun_dcl		: prim_dcl LPAREN params RPAREN cmpnd_stmt
 				{
 					$$ = newDclNode(FdclK);
 					if($1 == INT)
@@ -87,13 +83,13 @@ fun_dcl		: type_spec ID { savedName = copyString(tokenString); }
 					else if($1 == VOID)
 						$$->type = Void;
 					$$->attr.name = copyString(savedName);
-					$$->child[0] = $5;
-					$$->child[1] = $7;
+					$$->child[0] = $3;
+					$$->child[1] = $5;
 					$$->lineno = lineno;
 				}
 			;
 params		: param_list { $$ = $1; }
-			| VOID { /* empty */ }
+			| VOID /* empty */
 			;
 param_list	: param_list COMMA param
 				{
@@ -112,36 +108,11 @@ param_list	: param_list COMMA param
 				}
 			| param { $$ = $1; }
 			;
-param		: type_spec ID
+param		: prim_dcl {$$ = $1; $$->is_param = TRUE; }
+			| prim_dcl LBRACE RBRACE
 				{
-					$$ = newExpNode(IdK);
-					if($1 == INT)
-						$$->type = Integer;
-					else if($1 == VOID)
-						$$->type = Void;
-					else
-					{
-						if($$ != NULL) {
-							free($$);
-							$$ = NULL;
-						}
-						yyerror("invalid type error");
-						exit(1);
-					}
-					$$->attr.name = copyString(tokenString);
+					$$ = $1;
 					$$->is_param = TRUE;
-					$$->lineno = lineno;
-				}
-			| type_spec ID { 
-				savedName = copyString(tokenString);
-			} LBRACE RBRACE
-				{
-					$$ = newExpNode(IdK);
-					$$->type = Integer;
-					
-					$$->attr.name = savedName;
-					$$->is_param = TRUE;
-					$$->lineno = lineno;
 					$$->arr_size = 0;	// don't know the size
 				}
 			;
@@ -163,7 +134,7 @@ local_dcls	: local_dcls var_dcl
 						$$ = $1;
 					} else $$ = $2;
 				}
-			| /* empty */ 
+			| /* empty */
 			;
 stmt_list   : stmt_list_ { $$ = $1; }	
 			| /* empty */
@@ -226,18 +197,15 @@ exp			: var ASSIGN exp
 			| simple_exp
 				{ $$ = $1; }
 			;
-var			: ID 
-				{ $$ = newExpNode(IdK);
+id_var		: ID { $$ = newExpNode(IdK);
 				  $$->attr.name = copyString(tokenString);
 				  $$->lineno = lineno;
 				}
-			| ID { savedName = copyString(tokenString);
-                   savedLineNo = lineno; }
-				LBRACE exp RBRACE
-				{ $$ = newExpNode(IdK);
-				  $$->child[0] = $4;
-				  $$->attr.name = savedName;
-				  $$->lineno = savedLineNo;
+			;
+var			: 
+			| id_var LBRACE exp RBRACE
+				{ $$ = $1;
+				  $$->child[0] = $3;
 				}
 			;
 simple_exp	: addt_exp relop addt_exp
@@ -309,6 +277,7 @@ arg_list	: arg_list COMMA exp
 				}
 			| exp { $$ = $1; }
 			;
+
 /* user implementation ended. */
 
 %%
