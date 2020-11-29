@@ -13,10 +13,10 @@
  */
 void printToken( TokenType, const char* );
 
-/* Function newTypeNode creates a new declaration
+/* Function newPrimeNode creates a new declaration
  * node for syntax tree construction
  */
-TreeNode * newTypeNode(DclKind kind, ExpType et);
+TreeNode * newPrimeNode();
 
 /* Function newDclNode creates a new declaration
  * node for syntax tree construction

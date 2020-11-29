@@ -53,39 +53,41 @@ dcl			: var_dcl { $$ = $1; }
 			| fun_dcl { $$ = $1; }
 			;
 
-var_dcl		: nv_dcl SEMI | arr_dcl SEMI;
+var_dcl		: nv_dcl SEMI	{$$ = $1;}
+			| arr_dcl SEMI	{$$ = $1;}
+			;
 prim_dcl	: INT ID {
 				  /* int a */
-				  $$ = newDclNode(VdclK);
+				  $$ = newPrimeNode();
 				  $$->attr.name = copyString(tokenString);
 				  $$->type = Integer;
-				  $$->lineno = lineno;
 			  }
 			| VOID ID {
 				  /* void a */
-				  $$ = newDclNode(VdclK);
+				  $$ = newPrimeNode();
 				  $$->attr.name = copyString(tokenString);
 				  $$->type = Void;
-				  $$->lineno = lineno;
 			  }
-nv_dcl		: prim_dcl {$$=$1;}
+nv_dcl		: prim_dcl {
+				  $$ = $1;
+				  $$->nodekind = DclK;
+				  $$->kind.dcl = VdclK;
+			  }
 			;
 arr_dcl		: prim_dcl LBRACE NUM { savedVal = atoi(tokenString); } RBRACE {
 				  $$ = $1;
 				  $$->arr_size = savedVal;
+				  $$->nodekind = DclK;
+				  $$->kind.dcl = VdclK;
 			  }
 			;
 fun_dcl		: prim_dcl LPAREN params RPAREN cmpnd_stmt
 				{
-					$$ = newDclNode(FdclK);
-					if($1 == INT)
-						$$->type = Integer;
-					else if($1 == VOID)
-						$$->type = Void;
-					$$->attr.name = copyString(savedName);
+					$$ = $1;
+					$$->nodekind = DclK;
+					$$->kind.dcl = FdclK;
 					$$->child[0] = $3;
 					$$->child[1] = $5;
-					$$->lineno = lineno;
 				}
 			;
 params		: param_list { $$ = $1; }
@@ -108,9 +110,11 @@ param_list	: param_list COMMA param
 				}
 			| param { $$ = $1; }
 			;
-param		: prim_dcl {$$ = $1; $$->is_param = TRUE; }
-			| prim_dcl LBRACE RBRACE
-				{
+param		: prim_dcl {
+				  $$ = $1; 
+				  $$->is_param = TRUE; 
+			  }
+			| prim_dcl LBRACE RBRACE {
 					$$ = $1;
 					$$->is_param = TRUE;
 					$$->arr_size = 0;	// don't know the size
@@ -134,10 +138,10 @@ local_dcls	: local_dcls var_dcl
 						$$ = $1;
 					} else $$ = $2;
 				}
-			| /* empty */
+			| { $$ = NULL; }
 			;
 stmt_list   : stmt_list_ { $$ = $1; }	
-			| /* empty */
+			| { $$ = NULL; }
             ;
 stmt_list_	: stmt_list_ stmt
                  { YYSTYPE t = $1;
@@ -146,9 +150,6 @@ stmt_list_	: stmt_list_ stmt
                         t = t->sibling;
                      t->sibling = $2;
                      $$ = $1; 
-				   } else {
-					   yyerror("statement needed before ';'");
-					   $$ = NULL;
 				   }
                  }
 			| stmt { $$ = $1; }
@@ -159,8 +160,14 @@ stmt        : select_stmt { $$ = $1; }
 			| iter_stmt { $$ = $1; }
 			| return_stmt { $$ = $1; }
 			;
-exp_stmt	: exp SEMI { $$ = $1; }
-			| SEMI
+exp_stmt	: exp SEMI { 
+				  $$ = newStmtNode(ExpSK);
+				  $$->child[0] = $1;
+			  }
+			| SEMI {
+				$$ = newStmtNode(ExpSK);
+				/* empty statement */
+			}
 			;
 select_stmt : IF LPAREN exp RPAREN stmt 
                  { $$ = newStmtNode(IfK);
@@ -171,7 +178,7 @@ select_stmt : IF LPAREN exp RPAREN stmt
                  { $$ = newStmtNode(IfK);
                    $$->child[0] = $3;
                    $$->child[1] = $5;
-                   $$->child[2] = $6;
+                   $$->child[2] = $7;
                  }
             ;
 iter_stmt	: WHILE LPAREN exp RPAREN stmt
@@ -197,12 +204,12 @@ exp			: var ASSIGN exp
 			| simple_exp
 				{ $$ = $1; }
 			;
-id_var		: ID { $$ = newExpNode(IdK);
+id_var		: ID { 
+				  $$ = newExpNode(IdK);
 				  $$->attr.name = copyString(tokenString);
-				  $$->lineno = lineno;
 				}
 			;
-var			: 
+var			: id_var { $$ = $1; } 
 			| id_var LBRACE exp RBRACE
 				{ $$ = $1;
 				  $$->child[0] = $3;
@@ -210,36 +217,42 @@ var			:
 			;
 simple_exp	: addt_exp relop addt_exp
 				{
-					$$ = newExpNode(OpK);
+					$$ = $2;
 					$$->child[0] = $1;
-					$$->attr.op = $2;
 					$$->child[1] = $3;
 				}
-			| addt_exp { $$ = $1; }
+			| addt_exp { 
+					$$ = $1; 
+				}
 			;
-relop		: LE | LT | GT | GE | EQ | NE  
+relop		: LE { $$ = newExpNode(OpK); $$->attr.op = LE; }
+			| LT { $$ = newExpNode(OpK); $$->attr.op = LT; }
+			| GT { $$ = newExpNode(OpK); $$->attr.op = GT; }
+			| GE { $$ = newExpNode(OpK); $$->attr.op = GE; }
+			| EQ { $$ = newExpNode(OpK); $$->attr.op = EQ; }
+			| NE { $$ = newExpNode(OpK); $$->attr.op = NE; }
 			; 
 addt_exp	: addt_exp addop term
 				{
-					$$ = newExpNode(OpK);
+					$$ = $2;
 					$$->child[0] = $1;
-					$$->attr.op = $2;
 					$$->child[1] = $3;
 				}
 			| term { $$ = $1; }
 			;
-addop		: PLUS | MINUS 
+addop		: PLUS { $$ = newExpNode(OpK); $$->attr.op = PLUS; }
+			| MINUS { $$ = newExpNode(OpK); $$->attr.op = MINUS; } 
 			;
 term		: term mulop factor
 				{
-					$$ = newExpNode(OpK);
+					$$ = $2;
 					$$->child[0] = $1;
 					$$->child[1] = $3;
-					$$->attr.op = $2;
 				}
 			| factor { $$ = $1; }
 			;
-mulop		: TIMES | OVER
+mulop		: TIMES { $$ = newExpNode(OpK); $$->attr.op = TIMES; }
+			| OVER { $$ = newExpNode(OpK); $$->attr.op = OVER; }
 			;
 factor		: LPAREN exp RPAREN
 				{ $$ = newExpNode(ParenK); 
@@ -247,19 +260,17 @@ factor		: LPAREN exp RPAREN
 				}
 			| var { $$ = $1; }
 			| call { $$ = $1; }
-			| NUM { $$ = NUM; }
+			| NUM { $$ = newExpNode(ConstK); $$->attr.val = atoi(tokenString); }
 			;
-call		: ID { savedName = copyString(tokenString);
-				   savedLineNo = lineno;
-			  } LPAREN args RPAREN
+call		: id_var LPAREN args RPAREN
 				{
 					$$ = newExpNode(CallK);
-					$$->attr.name = savedName;
-					$$->child[0] = $4;
+					$$->child[0] = $1;
+					$$->child[1] = $3;
 				}
 			;
 args		: arg_list { $$ = $1; }
-			| /* empty */
+			| { $$ = NULL; }
 			;
 arg_list	: arg_list COMMA exp
 				{ YYSTYPE al = $1;
@@ -268,7 +279,7 @@ arg_list	: arg_list COMMA exp
 					  while(al->sibling != NULL)
 						  al = al->sibling;
 					  al->sibling = $3;
-					  $$ = al;
+					  $$ = $1;
 				  } else { 
 					  yyerror("Function-call needs an argument before ','"); 
 					  $$ = NULL;  

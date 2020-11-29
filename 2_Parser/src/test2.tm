@@ -1,4 +1,19 @@
-int a;
-void b[10];
+int add(int a, int b)
+{
+	return a+b;
+}
 
-int main(int k){}
+int sub(int a, int b)
+{
+	return a - b;
+}
+
+/* comment ok?
+   *
+   *
+   */
+
+int mult(int a, int b)
+{
+	return a*b;
+}
