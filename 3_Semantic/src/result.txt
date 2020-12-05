@@ -1,0 +1,6 @@
+
+C-MINUS COMPILATION: test.tm
+
+Syntax tree:
+  Var declaration, name : ;, type : int
+  Var declaration, name : ;, type : void
