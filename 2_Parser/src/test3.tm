@@ -1,4 +1,7 @@
-int main(void) {
-	a = b = c = 3;
-	return a + b + c;
+int main(void)
+{
+	int a;
+	int b;
+	a=b;
+	return a;
 }
