@@ -182,15 +182,19 @@ void printTree( TreeNode * tree )
 	if (tree->nodekind==DclK)
 	{ switch (tree->kind.dcl) {
 		case VdclK:
+			if(tree->arr_size != -1) {
+				fprintf(listing,"size : %d\n", tree->arr_size);
+				break;
+			}
 			fprintf(listing,"Var declaration, name : %s, type : ",tree->attr.name);
 			if(tree->type == Integer)
 				fprintf(listing,"int ");
+			else if(tree->type == IntArr)
+				fprintf(listing,"int[] ");
 			else if(tree->type == Void)
 				fprintf(listing,"void ");
 			else
 				fprintf(listing,"unknown type");
-			if(tree->arr_size != -1)
-				fprintf(listing,", array size : %d", tree->arr_size);
 			fprintf(listing,"\n");
 			break;
 		case FdclK:

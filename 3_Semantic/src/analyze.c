@@ -46,10 +46,39 @@ static void nullProc(TreeNode * t)
  * the symbol table 
  */
 static void insertNode( TreeNode * t)
-{ switch (t->nodekind)
-  { case StmtK:
+{ 
+	if(t == NULL)	return;
+  switch (t->nodekind)
+  { 
+	  case DclK:
+	   switch(t->kind.dcl) {
+		  case VdclK:
+			  BucketList bl = st_lookup(t->attr.name);
+			  st_insert("variable declaration", t->attr.name, t->type, t->lineno, (bl==NULL?location++:0));
+			  break;
+		  case FdclK:
+			  BucketList bl = st_lookup(t->attr.name);
+			  st_insert("function declaration", t->attr.name, t->type, t->lineno, (bl==NULL?location++:0));
+			  break;
+		  default:
+			  break;
+	  }
+	  break;
+	 case StmtK:
       switch (t->kind.stmt)
       { 
+		  case IfK:
+			  break;
+		  case WhileK:
+			  break;
+		  case ExpSK:
+			  break;
+		  case CmpndK:
+			  break;
+		  case RetK:
+			  break;
+		  default:
+			  break;
 		/*case ReadK:
           if (st_lookup(t->attr.name) == -1)
           * not yet in table, so treat as new definition *

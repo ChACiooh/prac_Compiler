@@ -74,11 +74,17 @@ nv_dcl		: prim_dcl {
 				  $$->kind.dcl = VdclK;
 			  }
 			;
-arr_dcl		: prim_dcl LBRACE NUM { savedVal = atoi(tokenString); } RBRACE {
+lbr_num		: LBRACE NUM {
+				  $$ = newDclNode(VdclK);
+				  $$->arr_size = atoi(tokenString);
+			  }
+			;
+arr_dcl		: prim_dcl lbr_num RBRACE {
 				  $$ = $1;
-				  $$->arr_size = savedVal;
+				  $$->child[0] = $2;
 				  $$->nodekind = DclK;
 				  $$->kind.dcl = VdclK;
+				  $$->type = IntArr;
 			  }
 			;
 fun_dcl		: prim_dcl LPAREN params RPAREN cmpnd_stmt

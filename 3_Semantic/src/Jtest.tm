@@ -1,3 +1,5 @@
+int arr[10];
+
 int main(void) {
 	int MonaWallet;
 	int KeqingWallet;

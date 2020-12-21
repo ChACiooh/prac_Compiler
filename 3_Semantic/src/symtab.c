@@ -70,8 +70,8 @@ static ScopeList hashTable[SIZE];
  */
 void st_insert( char * scope, char * name, ExpType type, int lineno, int loc )
 { int h1 = hash(scope), h2 = hash(name);
-  ScopeList sl = hashTable[h];
-  BucketList bl = sl->bucket[h2];
+  ScopeList sl = hashTable[h1];
+
   while ((sl != NULL) && (strcmp(scope,sl->name) != 0))
     sl = sl->parent;
   if (sl == NULL)
@@ -81,12 +81,11 @@ void st_insert( char * scope, char * name, ExpType type, int lineno, int loc )
 	  sl->parent = hashTable[h1];
 	  hashTable[h1] = sl;
   }
-  // TODO
-  Linelist t = sl->bucket[h2]->lines;
-  while(t->next != NULL) t = t->next;
-  t->next = (LineList)malloc(sizeof(struct LineListRec));
-  while ((bl != NULL) && (strcmp(name,bl->name) != 0))
-	bl = bl->next;
+  
+  /* found scope or inserted new scope */
+  BucketList bl = sl->bucket[h2];
+  while((bl != NULL) && (strcmp(name, bl->name) != 0))
+	  bl = bl->next;
   if (bl == NULL) /* variable not yet in table */
   { bl = (BucketList) malloc(sizeof(struct BucketListRec));
     bl->name = name;
@@ -96,13 +95,15 @@ void st_insert( char * scope, char * name, ExpType type, int lineno, int loc )
     bl->memloc = loc;
     bl->lines->next = NULL;
     bl->next = hashTable[h2];
-    hashTable[h2] = bl; }
-  else /* found in table, so just add line number */
-  { LineList t = l->lines;
-    while (t->next != NULL) t = t->next;
-    t->next = (LineList) malloc(sizeof(struct LineListRec));
-    t->next->lineno = lineno;
-    t->next->next = NULL;
+    hashTable[h2] = bl; 
+  }
+  else
+  {
+	  LineList t = l->lines;
+	  while(t->next != NULL) t = t->next;
+	  t->next = (LineList) malloc(sizeof(struct LineListRec));
+	  t->next->lineno = lineno;
+      t->next->next = NULL;
   }
 } /* st_insert */
 
@@ -119,20 +120,23 @@ int st_lookup ( char * scope, char * name )
 }
  */
 
+/* Function st_lookup returns the memory
+ * if it doesn't exist, returns NULL
+ */
 BucketList st_lookup(char *scope, char *name)
 {
-	int h = hash(name);
-	int k = hash(scope);
-	BucketList l = hashTable[h];
-	while( (l != NULL) && (strcmp(name, l->name) != 0) )
+	int h1 = hash(scope), h2 = hash(name);
+	ScopeList sl = hashTable[h];
+	BucketList bl = NULL;
+	while( (sl != NULL) && (strcmp(scope, sl->name) != 0) )
+		sl = sl->parent;
+	if(sl != NULL)
 	{
-		l = l->next;
-		if(l == NULL)
-		{
-			l = l->
-		}
+		bl = sl->bucket[h2];
+		while((bl != NULL) && (strcmp(name, bl->name) != 0))
+			bl = bl->next;
 	}
-	return l;
+	return bl;
 }
 
 /* Procedure printSymTab prints a formatted 
@@ -140,23 +144,33 @@ BucketList st_lookup(char *scope, char *name)
  * to the listing file
  */
 void printSymTab(FILE * listing)
-{ int i;
-  fprintf(listing,"Variable Name  Location   Line Numbers\n");
-  fprintf(listing,"-------------  --------   ------------\n");
-  for (i=0;i<SIZE;++i)
-  { if (hashTable[i] != NULL)
-    { BucketList l = hashTable[i];
-      while (l != NULL)
-      { LineList t = l->lines;
-        fprintf(listing,"%-14s ",l->name);
-        fprintf(listing,"%-8d  ",l->memloc);
-        while (t != NULL)
-        { fprintf(listing,"%4d ",t->lineno);
-          t = t->next;
-        }
-        fprintf(listing,"\n");
-        l = l->next;
-      }
-    }
+{ 
+	int i,j;
+    for (i=0;i<SIZE;++i)
+    { 
+	  ScopeList sl = hashTable[i];
+	  if (sl != NULL)
+      { 
+		fprintf(listing,"Variable Name  Location   Line Numbers\n");
+		fprintf(listing,"-------------  --------   ------------\n");
+
+		for(j=0;j<SIZE;++j)
+		{
+			BucketList bl = sl->bucket[j];
+			if(bl == NULL)	continue;
+
+			fprintf(listing,"%-14s ", bl->name);
+			fprintf(listing,"%-8d  ", bl->memloc);
+
+			LineList t = bl->lines;
+			while(t != NULL)
+			{
+				fprintf(listing,"%4d ", t->lineno);
+				t = t->next;
+			}
+			fprintf(listing, "\n");
+			bl = bl->next;
+		 }
+	  }
   }
 } /* printSymTab */
