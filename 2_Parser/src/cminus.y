@@ -74,9 +74,16 @@ nv_dcl		: prim_dcl {
 				  $$->kind.dcl = VdclK;
 			  }
 			;
-arr_dcl		: prim_dcl LBRACE NUM { savedVal = atoi(tokenString); } RBRACE {
-				  $$ = $1;
+lbr_num		: LBRACE NUM {
+				  $$ = newPrimeNode();
+				  savedVal = atoi(tokenString);
 				  $$->arr_size = savedVal;
+			  }
+			;
+arr_dcl		: prim_dcl lbr_num RBRACE {
+				  $$ = $1;
+				  $$->arr_size = $2->arr_size;
+				  free($2);
 				  $$->nodekind = DclK;
 				  $$->kind.dcl = VdclK;
 			  }

@@ -1,4 +1,6 @@
-int main(void) {
+int aa[10];
+
+int main(int argc, int argv[]) {
 	int MonaWallet;
 	int KeqingWallet;
 
