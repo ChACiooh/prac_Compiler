@@ -100,9 +100,10 @@ static void insertIOfunc()
 static void setScopes(TreeNode *t)
 {
 	int i;
-	if(t == NULL || t->scope == NULL)	return;
+	if(t == NULL)	return;
 	for(i = 0; i < MAXCHILDREN; ++i)
 	{
+		if(t->child[i] == NULL)	break;
 		t->child[i]->scope = t->scope;
 		setScopes(t->child[i]);
 	}
