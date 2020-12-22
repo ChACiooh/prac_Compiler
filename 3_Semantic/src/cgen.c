@@ -98,8 +98,9 @@ static void genStmt( TreeNode * tree)
 
 /* Procedure genExp generates code at an expression node */
 static void genExp( TreeNode * tree)
-{ int loc;
+{ 
   TreeNode * p1, * p2;
+  BucketList bl = NULL;
   switch (tree->kind.exp) {
 
     case ConstK :
@@ -111,8 +112,8 @@ static void genExp( TreeNode * tree)
     
     case IdK :
       if (TraceCode) emitComment("-> Id") ;
-      loc = st_lookup(tree->attr.name);
-      emitRM("LD",ac,loc,gp,"load id value");
+      bl = st_lookup("IdK", tree->attr.name);
+      emitRM("LD",ac,bl->memloc,gp,"load id value");
       if (TraceCode)  emitComment("<- Id") ;
       break; /* IdK */
 

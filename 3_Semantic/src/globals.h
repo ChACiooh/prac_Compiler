@@ -85,6 +85,7 @@ typedef struct treeNode
 
 	 int arr_size;
 	 int is_param;
+	 char *scope;
    } TreeNode;
 
 /**************************************************/

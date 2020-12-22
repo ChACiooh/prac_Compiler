@@ -16,9 +16,11 @@
 static char * savedName; /* for use in assignments */
 static int savedLineNo;  /* ditto */
 static int savedVal;
+static int nonamed = 0;
 static TreeNode * savedTree; /* stores syntax tree for later return */
 static int yylex(void); // added 11/2/11 to ensure no conflict with lex
 static void assert(YYSTYPE, int);
+static char* getNoName();
 
 %}
 
@@ -41,16 +43,25 @@ dcl_list	: dcl_list dcl
 				{ YYSTYPE t = $1;
 				  if (t != NULL)
 				  {
+					  t->scope = "global";
 					  while (t->sibling != NULL)
+					  {
 						  t = t->sibling;
+						  t->scope = "global";
+					  }
 					  t->sibling = $2;
+					  t->scope = "global";
 					  $$ = $1;
 				  } else $$ = $2;
 				}
-			| dcl { $$ = $1; }
+			| dcl { $$ = $1; $$->scope = "global"; }
 			;
-dcl			: var_dcl { $$ = $1; }
-			| fun_dcl { $$ = $1; }
+dcl			: var_dcl { 
+				  $$ = $1;
+			  }
+			| fun_dcl {
+				$$ = $1;
+			}
 			;
 
 var_dcl		: nv_dcl SEMI	{$$ = $1;}
@@ -93,7 +104,9 @@ fun_dcl		: prim_dcl LPAREN params RPAREN cmpnd_stmt
 					$$->nodekind = DclK;
 					$$->kind.dcl = FdclK;
 					$$->child[0] = $3;
+					$$->child[0]->scope = $$->attr.name;
 					$$->child[1] = $5;
+					$$->child[1]->scope = $$->attr.name;
 				}
 			;
 params		: param_list { $$ = $1; }
@@ -126,6 +139,7 @@ param		: prim_dcl {
 			| prim_dcl LBRACE RBRACE {
 					$$ = $1;
 					$$->is_param = TRUE;
+					$$->type = IntArr;
 					$$->arr_size = 0;	// don't know the size
 				}
 			;
@@ -156,7 +170,10 @@ stmt_list_	: stmt_list_ stmt
                  { YYSTYPE t = $1;
                    if (t != NULL)
                    { while (t->sibling != NULL)
-                        t = t->sibling;
+                     {
+						 t->scope = $1->scope;
+						 t = t->sibling;
+					 }
                      t->sibling = $2;
                      $$ = $1; 
 				   }
@@ -320,6 +337,13 @@ static int yylex(void)
 TreeNode * parse(void)
 { yyparse();
   return savedTree;
+}
+
+static char* getNoName()
+{
+	static char tmp[10000];
+	sprintf(tmp, "%d", nonamed++);
+	return copyString(tmp);
 }
 
 static void assert(YYSTYPE v, int k)

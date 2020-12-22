@@ -75,6 +75,7 @@ TreeNode * newPrimeNode()
 	t->nodekind = PrimK;
 	t->is_param = FALSE;
 	t->arr_size = -1;
+	t->scope = NULL;
   }
   return t;
 }
@@ -95,6 +96,7 @@ TreeNode * newDclNode(DclKind kind)
     t->lineno = lineno;
 	t->is_param = FALSE;
 	t->arr_size = -1;
+	t->scope = NULL;
   }
   return t;
 }
@@ -115,6 +117,7 @@ TreeNode * newStmtNode(StmtKind kind)
     t->lineno = lineno;
 	t->is_param = FALSE;
 	t->arr_size = -1;
+	t->scope = NULL;
   }
   return t;
 }
@@ -136,6 +139,7 @@ TreeNode * newExpNode(ExpKind kind)
     t->type = Void;
 	t->is_param = FALSE;
 	t->arr_size = -1;	// it is not array basically.
+	t->scope = NULL;
   }
   return t;
 }
@@ -266,12 +270,13 @@ void printTree( TreeNode * tree )
 		if(tree->arr_size == -1) 
 			fprintf(listing,"Single parameter, name : %s, type : ",tree->attr.name);
 		else
-			fprintf(listing,"Array parameter, name : %s, type : ",tree->attr.name);
+			fprintf(listing,"Array parameter, name : %s, type : int[]",tree->attr.name);
 
 		if(tree->type == Integer)
-			fprintf(listing,"int\n");
-		else
-			fprintf(listing,"void\n");
+			fprintf(listing,"int");
+		else if(tree->type == Void)
+			fprintf(listing,"void");
+		fprintf(listing, "\n");
 	  }
 	}
     else fprintf(listing,"Unknown node kind\n");

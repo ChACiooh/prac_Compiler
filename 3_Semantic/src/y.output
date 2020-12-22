@@ -23,9 +23,9 @@ Terminals unused in grammar
 
    10 nv_dcl: prim_dcl
 
-   11 $@1: %empty
+   11 lbr_num: LBRACE NUM
 
-   12 arr_dcl: prim_dcl LBRACE NUM $@1 RBRACE
+   12 arr_dcl: prim_dcl lbr_num RBRACE
 
    13 fun_dcl: prim_dcl LPAREN params RPAREN cmpnd_stmt
 
@@ -133,14 +133,14 @@ Terminals, with rules where they appear
     ASSIGN (274) 39
     LPAREN (275) 13 34 35 36 60 64
     RPAREN (276) 13 34 35 36 60 64
-    LBRACE (277) 12 19 43
+    LBRACE (277) 11 19 43
     RBRACE (278) 12 19 43
     LCURLY (279) 20
     RCURLY (280) 20
     SEMI (281) 6 7 32 33 37 38
     COMMA (282) 16 67
     ID (283) 8 9 41
-    NUM (284) 12 63
+    NUM (284) 11 63
     ERROR (285)
     IFX (286)
 
@@ -167,12 +167,12 @@ Nonterminals, with rules where they appear
     nv_dcl (38)
         on left: 10
         on right: 6
-    arr_dcl (39)
-        on left: 12
-        on right: 7
-    $@1 (40)
+    lbr_num (39)
         on left: 11
         on right: 12
+    arr_dcl (40)
+        on left: 12
+        on right: 7
     fun_dcl (41)
         on left: 13
         on right: 5
@@ -326,7 +326,7 @@ State 6
 State 7
 
    10 nv_dcl: prim_dcl .
-   12 arr_dcl: prim_dcl . LBRACE NUM $@1 RBRACE
+   12 arr_dcl: prim_dcl . lbr_num RBRACE
    13 fun_dcl: prim_dcl . LPAREN params RPAREN cmpnd_stmt
 
     LPAREN  shift, and go to state 15
@@ -334,19 +334,21 @@ State 7
 
     $default  reduce using rule 10 (nv_dcl)
 
+    lbr_num  go to state 17
+
 
 State 8
 
     6 var_dcl: nv_dcl . SEMI
 
-    SEMI  shift, and go to state 17
+    SEMI  shift, and go to state 18
 
 
 State 9
 
     7 var_dcl: arr_dcl . SEMI
 
-    SEMI  shift, and go to state 18
+    SEMI  shift, and go to state 19
 
 
 State 10
@@ -389,36 +391,43 @@ State 15
    13 fun_dcl: prim_dcl LPAREN . params RPAREN cmpnd_stmt
 
     INT   shift, and go to state 1
-    VOID  shift, and go to state 19
+    VOID  shift, and go to state 20
 
-    prim_dcl    go to state 20
-    params      go to state 21
-    param_list  go to state 22
-    param       go to state 23
+    prim_dcl    go to state 21
+    params      go to state 22
+    param_list  go to state 23
+    param       go to state 24
 
 
 State 16
 
-   12 arr_dcl: prim_dcl LBRACE . NUM $@1 RBRACE
+   11 lbr_num: LBRACE . NUM
 
-    NUM  shift, and go to state 24
+    NUM  shift, and go to state 25
 
 
 State 17
+
+   12 arr_dcl: prim_dcl lbr_num . RBRACE
+
+    RBRACE  shift, and go to state 26
+
+
+State 18
 
     6 var_dcl: nv_dcl SEMI .
 
     $default  reduce using rule 6 (var_dcl)
 
 
-State 18
+State 19
 
     7 var_dcl: arr_dcl SEMI .
 
     $default  reduce using rule 7 (var_dcl)
 
 
-State 19
+State 20
 
     9 prim_dcl: VOID . ID
    15 params: VOID .
@@ -428,91 +437,89 @@ State 19
     $default  reduce using rule 15 (params)
 
 
-State 20
+State 21
 
    18 param: prim_dcl .
    19      | prim_dcl . LBRACE RBRACE
 
-    LBRACE  shift, and go to state 25
+    LBRACE  shift, and go to state 27
 
     $default  reduce using rule 18 (param)
 
 
-State 21
+State 22
 
    13 fun_dcl: prim_dcl LPAREN params . RPAREN cmpnd_stmt
 
-    RPAREN  shift, and go to state 26
+    RPAREN  shift, and go to state 28
 
 
-State 22
+State 23
 
    14 params: param_list .
    16 param_list: param_list . COMMA param
 
-    COMMA  shift, and go to state 27
+    COMMA  shift, and go to state 29
 
     $default  reduce using rule 14 (params)
 
 
-State 23
+State 24
 
    17 param_list: param .
 
     $default  reduce using rule 17 (param_list)
 
 
-State 24
-
-   12 arr_dcl: prim_dcl LBRACE NUM . $@1 RBRACE
-
-    $default  reduce using rule 11 ($@1)
-
-    $@1  go to state 28
-
-
 State 25
 
-   19 param: prim_dcl LBRACE . RBRACE
+   11 lbr_num: LBRACE NUM .
 
-    RBRACE  shift, and go to state 29
+    $default  reduce using rule 11 (lbr_num)
 
 
 State 26
 
-   13 fun_dcl: prim_dcl LPAREN params RPAREN . cmpnd_stmt
+   12 arr_dcl: prim_dcl lbr_num RBRACE .
 
-    LCURLY  shift, and go to state 30
-
-    cmpnd_stmt  go to state 31
+    $default  reduce using rule 12 (arr_dcl)
 
 
 State 27
+
+   19 param: prim_dcl LBRACE . RBRACE
+
+    RBRACE  shift, and go to state 30
+
+
+State 28
+
+   13 fun_dcl: prim_dcl LPAREN params RPAREN . cmpnd_stmt
+
+    LCURLY  shift, and go to state 31
+
+    cmpnd_stmt  go to state 32
+
+
+State 29
 
    16 param_list: param_list COMMA . param
 
     INT   shift, and go to state 1
     VOID  shift, and go to state 2
 
-    prim_dcl  go to state 20
-    param     go to state 32
+    prim_dcl  go to state 21
+    param     go to state 33
 
 
-State 28
-
-   12 arr_dcl: prim_dcl LBRACE NUM $@1 . RBRACE
-
-    RBRACE  shift, and go to state 33
-
-
-State 29
+State 30
 
    19 param: prim_dcl LBRACE RBRACE .
 
     $default  reduce using rule 19 (param)
 
 
-State 30
+State 31
 
    20 cmpnd_stmt: LCURLY . local_dcls stmt_list RCURLY
 
@@ -521,25 +528,18 @@ State 30
     local_dcls  go to state 34
 
 
-State 31
+State 32
 
    13 fun_dcl: prim_dcl LPAREN params RPAREN cmpnd_stmt .
 
     $default  reduce using rule 13 (fun_dcl)
 
 
-State 32
+State 33
 
    16 param_list: param_list COMMA param .
 
     $default  reduce using rule 16 (param_list)
-
-
-State 33
-
-   12 arr_dcl: prim_dcl LBRACE NUM $@1 RBRACE .
-
-    $default  reduce using rule 12 (arr_dcl)
 
 
 State 34
@@ -553,7 +553,7 @@ State 34
     INT     shift, and go to state 1
     VOID    shift, and go to state 2
     LPAREN  shift, and go to state 38
-    LCURLY  shift, and go to state 30
+    LCURLY  shift, and go to state 31
     SEMI    shift, and go to state 39
     ID      shift, and go to state 40
     NUM     shift, and go to state 41
@@ -666,11 +666,13 @@ State 42
 State 43
 
    10 nv_dcl: prim_dcl .
-   12 arr_dcl: prim_dcl . LBRACE NUM $@1 RBRACE
+   12 arr_dcl: prim_dcl . lbr_num RBRACE
 
     LBRACE  shift, and go to state 16
 
     $default  reduce using rule 10 (nv_dcl)
+
+    lbr_num  go to state 17
 
 
 State 44
@@ -696,7 +698,7 @@ State 46
     RETURN  shift, and go to state 36
     WHILE   shift, and go to state 37
     LPAREN  shift, and go to state 38
-    LCURLY  shift, and go to state 30
+    LCURLY  shift, and go to state 31
     SEMI    shift, and go to state 39
     ID      shift, and go to state 40
     NUM     shift, and go to state 41
@@ -1206,7 +1208,7 @@ State 97
     RETURN  shift, and go to state 36
     WHILE   shift, and go to state 37
     LPAREN  shift, and go to state 38
-    LCURLY  shift, and go to state 30
+    LCURLY  shift, and go to state 31
     SEMI    shift, and go to state 39
     ID      shift, and go to state 40
     NUM     shift, and go to state 41
@@ -1235,7 +1237,7 @@ State 98
     RETURN  shift, and go to state 36
     WHILE   shift, and go to state 37
     LPAREN  shift, and go to state 38
-    LCURLY  shift, and go to state 30
+    LCURLY  shift, and go to state 31
     SEMI    shift, and go to state 39
     ID      shift, and go to state 40
     NUM     shift, and go to state 41
@@ -1320,7 +1322,7 @@ State 105
     RETURN  shift, and go to state 36
     WHILE   shift, and go to state 37
     LPAREN  shift, and go to state 38
-    LCURLY  shift, and go to state 30
+    LCURLY  shift, and go to state 31
     SEMI    shift, and go to state 39
     ID      shift, and go to state 40
     NUM     shift, and go to state 41
